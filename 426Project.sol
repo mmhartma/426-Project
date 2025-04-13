@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-
+import "hardhat/console.sol";
 interface IERC165 {
     function supportsInterface(bytes4 interfaceID) external view returns (bool);
 }
@@ -45,8 +45,10 @@ contract ERC721 {
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     // Hashed by [token][url][username]
-    mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32))) private _passwords;
-    mapping(uint256 => bytes32) _nft_passwords;
+    // mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes))) private _passwords;
+
+    // [hash(token,url,username)] => encrypted password
+    mapping(bytes32 => bytes) private _passwords;
 
     constructor(
         string memory _name, 
@@ -88,9 +90,6 @@ contract ERC721 {
         uint256 tokenId = _nextTokenId++;
         _mint(to, tokenId);
         tokenOwnerstoIds[to].push(tokenId);
-
-        // initial password will be the token id hashed
-        _nft_passwords[tokenId] = bytes32(keccak256(abi.encodePacked(tokenId)));
     }
 
     function _isApprovedOrOwner(
@@ -118,9 +117,6 @@ contract ERC721 {
         _balanceOf[to]++;
         _ownerOf[id] = to;
         delete _approvals[id];
-
-        // reset the nft password to the initial password
-        _nft_passwords[id] = keccak256(abi.encodePacked(id));
 
         emit Transfer(from, to, id);
     }
@@ -153,7 +149,6 @@ contract ERC721 {
 
     modifier onlyOwner(uint256 id, bytes32 hashed_nft_password) {
         require(_ownerOf[id] == msg.sender, "Only owner can use this");
-        require(_nft_passwords[id] == hashed_nft_password, "Invalid master password");
         _;
     }
 
@@ -164,9 +159,10 @@ contract ERC721 {
 
         bytes32 url,
         bytes32 username,
-        bytes32 hashed_password
+        bytes calldata encrypted_password
     ) onlyOwner(tokenId, hashed_nft_password) public {
-        _passwords[tokenId][url][username] = hashed_password;
+        bytes32 key = keccak256(abi.encodePacked(tokenId, url, username));
+        _passwords[key] = encrypted_password;
     }
 
     // Read
@@ -175,10 +171,13 @@ contract ERC721 {
         bytes32 hashed_nft_password, 
         bytes32 url, 
         bytes32 username
-    ) onlyOwner(tokenId, hashed_nft_password) public view returns (bytes32) {
-        require(_passwords[tokenId][url][username] != bytes32(0), "Password does not exist");
+    ) onlyOwner(tokenId, hashed_nft_password) public view returns (bytes memory) {
+        bytes32 key = keccak256(abi.encodePacked(tokenId, url, username));
+        bytes memory pass = _passwords[key];
+        
+        require(pass.length > 0, "Password does not exist");
 
-        return _passwords[tokenId][url][username];
+        return pass;
     }
 
     // Update
@@ -187,9 +186,10 @@ contract ERC721 {
         bytes32 hashed_nft_password, 
         bytes32 url, 
         bytes32 username, 
-        bytes32 hashed_new_password
+        bytes calldata new_pass
     ) onlyOwner(tokenId, hashed_nft_password) public {
-        _passwords[tokenId][url][username] = hashed_new_password;
+        bytes32 key = keccak256(abi.encodePacked(tokenId, url, username));
+        _passwords[key] = new_pass;
     }
  
     // Delete
@@ -199,14 +199,7 @@ contract ERC721 {
         bytes32 url, 
         bytes32 username
     ) onlyOwner(tokenId, hashed_nft_password) public {
-        delete _passwords[tokenId][url][username];
-    }
-
-    function changeMasterPassword(
-        uint256 tokenId, 
-        bytes32 hashed_nft_password, 
-        bytes32 newHash
-    ) onlyOwner(tokenId, hashed_nft_password) public {
-        _nft_passwords[tokenId] = newHash;
+        bytes32 key = keccak256(abi.encodePacked(tokenId, url, username));
+        delete _passwords[key];
     }
 }
