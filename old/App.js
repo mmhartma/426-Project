@@ -1,12 +1,17 @@
 let provider, signer, contract;
 
-const CONTRACT_ADDRESS = "ADDRESS HERE ";
-const ABI = ["ABI HERE"];
+const CONTRACT_ADDRESS = "";
+const ABI = [];
+import PWmD from "./artifacts/contracts/PwMD.sol/ERC721.json"
 
 async function connectWallet() {
     if (window.ethereum) {
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
+        
+		await window.ethereum.request({
+			method: "eth_requestAccounts"
+		})
+
         signer = provider.getSigner();
         contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
         alert("Wallet connected!");

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NFT Password Vault</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>NFT Password Vault</h1>
+
+        <button onclick="connectWallet()">🔗 Connect Wallet</button>
+        <button onclick="mint()">🪙 Mint NFT</button>
+
+        <section>
+            <h2>Store Password</h2>
+            <label>Token ID:</label>
+            <input id="tokenId" type="number"><br>
+            <label>URL:</label>
+            <input id="url" type="text"><br>
+            <label>Username:</label>
+            <input id="username" type="text"><br>
+            <label>Password:</label>
+            <input id="password" type="password"><br>
+            <button onclick="storePassword()">💾 Store</button>
+        </section>
+
+        <section>
+            <h2>Get Password</h2>
+            <label>Token ID:</label>
+            <input id="get_tokenId" type="number"><br>
+            <label>URL:</label>
+            <input id="get_url" type="text"><br>
+            <label>Username:</label>
+            <input id="get_username" type="text"><br>
+            <button onclick="getPassword()">🔍 Get</button>
+            <p id="get_result"></p>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
