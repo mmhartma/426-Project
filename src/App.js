@@ -132,11 +132,12 @@ function App() {
       const keyHash = ethers.id(masterKey);
       const url32   = ethers.encodeBytes32String(url);
       const user32  = ethers.encodeBytes32String(username);
-
       // encrypt plaintext
       const plainBytes = new TextEncoder().encode(password);
+
       const ivBytes    = window.crypto.getRandomValues(new Uint8Array(16));
-      const aesKey     = await importCryptoKey(new TextEncoder().encode(masterKey));
+      const encoded = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(masterKey))
+      const aesKey     = await importCryptoKey(new Uint8Array(encoded));
       const encrypted  = await window.crypto.subtle.encrypt(
         { name: "AES-CBC", iv: ivBytes },
         aesKey,
@@ -173,7 +174,8 @@ function App() {
       const encBytes        = ethers.getBytes(encHex);
       const ivBytes         = ethers.getBytes(ivHex);
 
-      const aesKey = await importCryptoKey(new TextEncoder().encode(masterKey));
+      const encoded = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(masterKey))
+      const aesKey     = await importCryptoKey(new Uint8Array(encoded));
       const decrypted = await window.crypto.subtle.decrypt(
         { name: "AES-CBC", iv: ivBytes },
         aesKey,
@@ -201,7 +203,8 @@ function App() {
 
       const newBytes = new TextEncoder().encode(newPassword);
       const ivBytes  = window.crypto.getRandomValues(new Uint8Array(16));
-      const aesKey   = await importCryptoKey(new TextEncoder().encode(masterKey));
+      const encoded = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(masterKey))
+      const aesKey     = await importCryptoKey(new Uint8Array(encoded));
       const encrypted = await window.crypto.subtle.encrypt(
         { name: "AES-CBC", iv: ivBytes },
         aesKey,
