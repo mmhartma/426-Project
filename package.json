@@ -38,6 +38,12 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "ethers": "^6.13.7",
     "hardhat": "^2.23.0"
-  }
+  },
+  "description": "Writeup: https://docs.google.com/document/d/1lC1aXTUgoB7zwYCiazCo7pRCKT__fCV9PVHPbxPWtPU/edit?usp=sharing",
+  "main": "hardhat.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
